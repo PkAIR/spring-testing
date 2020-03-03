@@ -1,54 +1,53 @@
 package example;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import example.common.BaseTest;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static com.codeborne.selenide.Selenide.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class HelloE2ESeleniumTest {
-
-    private WebDriver driver;
-
+public class HelloE2ESeleniumTest extends BaseTest {
     @LocalServerPort
     private int port;
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        WebDriverManager.chromedriver().version("78").setup();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        driver = new ChromeDriver();
-    }
-
-    @After
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+    @Test
+    @Tag("local")
+    public void helloPageHasTextHelloWorld() {
+        open(String.format("http://localhost:%s/hello", port));
+        assertThat($(By.tagName("body")).getText(), containsString("Hello World!"));
     }
 
     @Test
-    public void helloPageHasTextHelloWorld() {
-        driver.navigate().to(String.format("http://localhost:%s/hello", port));
+    @Tag("local")
+    public void helloStrangerTest() {
+        open(String.format("http://localhost:%s/hello/stranger", port));
+        assertThat($(By.tagName("body")).getText(),
+                containsString("Who is this 'stranger' you're talking about?"));
+    }
 
-        WebElement body = driver.findElement(By.tagName("body"));
+    @Test
+    @Tag("local")
+    public void weatherResponseTest() {
+        open(String.format("http://localhost:%s/weather", port));
+        assertThat($(By.tagName("body")).getText(), is(not(emptyString())));
+    }
 
-        assertThat(body.getText(), containsString("Hello World!"));
+    @Test
+    @Tag("selenoid")
+    public void googleCanBeOpened() throws InterruptedException {
+        open("https://www.google.com/");
+        assertThat($(By.xpath("//img[@alt='Google']")).isDisplayed(), is(true));
     }
 }

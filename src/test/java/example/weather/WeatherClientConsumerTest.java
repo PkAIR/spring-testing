@@ -1,37 +1,33 @@
 package example.weather;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.consumer.junit.PactProviderRule;
-import au.com.dius.pact.consumer.junit.PactVerification;
+import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
+import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import example.helper.FileLoader;
 import org.apache.http.entity.ContentType;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.IOException;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
+@ExtendWith(PactConsumerTestExt.class)
+@PactTestFor(providerName = "weather_provider", hostInterface = "localhost", port = "8089")
 @SpringBootTest
 public class WeatherClientConsumerTest {
 
     @Autowired
     private WeatherClient weatherClient;
 
-    @Rule
-    public PactProviderRule weatherProvider = new PactProviderRule
-            ("weather_provider", "localhost", 8089, this);
-
-    @Pact(consumer="sample_microservice")
+    @Pact(provider = "weather_provider", consumer="sample_microservice")
     public RequestResponsePact createPact(PactDslWithProvider builder) throws IOException {
         return builder
                 .given("weather forecast data")
@@ -45,7 +41,6 @@ public class WeatherClientConsumerTest {
     }
 
     @Test
-    @PactVerification("weather_provider")
     public void shouldFetchWeatherInformation() throws Exception {
         Optional<WeatherResponse> weatherResponse = weatherClient.fetchWeather();
         assertThat(weatherResponse.isPresent(), is(true));

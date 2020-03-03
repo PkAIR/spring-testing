@@ -1,7 +1,6 @@
 package example;
 
 import au.com.dius.pact.provider.junit.Provider;
-import au.com.dius.pact.provider.junit.RestPactRunner;
 import au.com.dius.pact.provider.junit.State;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.target.TestTarget;
@@ -9,9 +8,10 @@ import au.com.dius.pact.provider.spring.target.MockMvcTarget;
 import example.person.Person;
 import example.person.PersonRepository;
 import example.weather.WeatherClient;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 
@@ -24,7 +24,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
  *  found under https://github.com/hamvocke/spring-testing-consumer
  */
 
-@RunWith(RestPactRunner.class)
+@ExtendWith(SpringExtension.class)
 @Provider("person_provider")// same as in the "provider_name" part in our pact file
 @PactFolder("target/pacts") // tells pact where to load the pact files from
 public class ExampleProviderTest {
@@ -40,7 +40,7 @@ public class ExampleProviderTest {
     @TestTarget
     public final MockMvcTarget target = new MockMvcTarget();
 
-    @Before
+    @BeforeEach
     public void before() {
         initMocks(this);
         exampleController = new ExampleController(personRepository, weatherClient);

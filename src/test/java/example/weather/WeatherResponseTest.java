@@ -2,7 +2,7 @@ package example.weather;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import example.helper.FileLoader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
